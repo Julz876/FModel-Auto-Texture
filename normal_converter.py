@@ -1,6 +1,10 @@
 import bpy
 
 def create_normal_converter():
+    # Check if the node group already exists
+    if 'Normal_Convert' in bpy.data.node_groups:
+        return  # If it exists, no need to recreate it
+
     # create a group
     normal_convert_group = bpy.data.node_groups.new('Normal_Convert', 'ShaderNodeTree')
 
@@ -43,8 +47,3 @@ def create_normal_converter():
     # link inputs and outputs to the group
     normal_convert_group.links.new(group_inputs.outputs['Color'], node_separate_rgb.inputs['Image'])
     normal_convert_group.links.new(node_combine_rgb.outputs['Image'], group_outputs.inputs['Color'])
-
-
-# If you want to run this script directly in Blender, you can call the function here
-if __name__ == "__main__":
-    create_normal_converter()
