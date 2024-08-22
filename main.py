@@ -6,6 +6,9 @@ import random
 
 from .normal_converter import create_normal_converter
 
+def setup_material(material_name, json_file_path, texture_directories, common_prefix):
+    create_normal_converter()  # Create node group when setting up the material
+
 # Ensuring the normal converter is created and available
 create_normal_converter()
 
