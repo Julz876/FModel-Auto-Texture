@@ -5,6 +5,7 @@ import sys
 import random
 
 # Remove this after development
+# To allow for installation
 parent_dir = "H:/Modding_Tools/!Scripts"  # Parent directory containing the UE_Texture_Importer package
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
@@ -33,9 +34,10 @@ def find_textures(base_path, textures):
     return None, None
 
 # Replace 'your_material_file.json' with the actual path to your JSON file
-json_file_path = "H:/Dumped Games/CallistoProtocol/Game/Characters/Elias/Materials/Head/Base/MI_Elias_Head.json"
+json_file_path = your_material_file.json
 
 # Common prefix for relative texture paths
+# Dumped game directory
 common_prefix = "H:/Dumped Games/CallistoProtocol"
 
 # Possible texture directories
