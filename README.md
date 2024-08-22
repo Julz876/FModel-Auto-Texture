@@ -9,7 +9,9 @@ Here's a `README.md` file for your project:
 
 ## Overview
 
-The **UE Texture Importer** is a Blender addon designed to simplify the process of importing and setting up textures from Unreal Engine JSON material files. This tool automates the creation of materials in Blender, ensuring they are properly configured based on the texture maps specified in the JSON file. The addon includes a custom normal map converter, enabling you to switch between OpenGL and DirectX normal map formats with ease.
+The **UE Texture Importer** is a Blender addon designed to simplify the process of importing and setting up textures from Unreal Engine JSON material files. This tool automates the creation of materials in Blender, ensuring they are properly configured based on the texture maps specified in the JSON file. The add-on includes a custom normal map converter, enabling you to switch between OpenGL and DirectX normal map formats with ease.
+
+Note: This addon requires the PSK / PSA toolbar addon to be installed and enabled in Blender.
 
 ## Features
 
@@ -22,9 +24,10 @@ The **UE Texture Importer** is a Blender addon designed to simplify the process 
 ## Installation
 
 1. Download the repository.
-2. Open Blender and go to `Edit > Preferences > Add-ons`.
+2. Open Blender and click `Edit > Preferences > Add-ons`.
 3. Click `Install` and select the downloaded ZIP file or extracted folder containing the addon files.
 4. Enable the addon by checking the box next to "UE Texture Importer".
+5. Ensure that the PSK / PSA addon is installed and enabled, showing in the sidebar/N-Panel
 
 ## Usage
 
@@ -34,10 +37,10 @@ The **UE Texture Importer** is a Blender addon designed to simplify the process 
    
 2. **Select Textures Directory:**
    - Make sure the texture images are in one of the specified directories.
-   - The addon searches through the provided paths to locate and link the correct textures.
+   - The addon searches the provided paths to locate and link the correct textures.
 
 3. **Adjust Normal Map Settings (Optional):**
-   - The addon includes an option to flip the Y-axis for normal maps based on whether you’re using OpenGL or DirectX.
+   - The add-on includes an option to flip the Y-axis for normal maps based on whether you’re using OpenGL or DirectX.
    - This can be controlled by adjusting the `opengl_directx_flip` value in the script.
 
 4. **Run the Importer:**
