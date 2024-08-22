@@ -4,7 +4,6 @@ import os
 from .normal_converter import create_normal_converter
 
 def remove_nodes(node_tree):
-    # Remove all nodes from the node tree
     for node in node_tree.nodes:
         node_tree.nodes.remove(node)
 
@@ -19,12 +18,18 @@ def find_textures(base_path, textures):
     return None, None
 
 def setup_material(context, json_file_path, texture_directories):
-    # Create the normal converter node group if it doesn't already exist
+    if not json_file_path or not os.path.isfile(json_file_path):
+        print("Error: JSON file path is not valid or not provided.")
+        return {'CANCELLED'}
+    
+    if not texture_directories:
+        print("Error: Texture directories path is not provided.")
+        return {'CANCELLED'}
+
     create_normal_converter()
 
     opengl_directx_flip = 1.0
 
-    # Load JSON data
     with open(json_file_path, 'r') as json_file:
         try:
             mat_data = json.load(json_file)
@@ -32,27 +37,20 @@ def setup_material(context, json_file_path, texture_directories):
             print(f"Error decoding JSON in file '{json_file_path}': {e}")
             mat_data = {}
 
-    # Ensure the textures dictionary is defined and populated
     textures = mat_data.get("Textures", {})
     textures = {key: value.split('/')[-1].split('.')[0] for key, value in textures.items()}
 
-    # Get the base name of the JSON file (excluding the extension)
     material_name = os.path.splitext(os.path.basename(json_file_path))[0]
 
     print(f"Material Name: {material_name}")
 
-    # Find the material in Blender based on its name
     material = bpy.data.materials.get(material_name)
 
     if material:
-        # Ensure we're using nodes in the material
         material.use_nodes = True
         nodes = material.node_tree.nodes
-
-        # Clear existing nodes in the material
         remove_nodes(material.node_tree)
     
-        # Create Shader nodes
         principled_node = material.node_tree.nodes.new(type='ShaderNodeBsdfPrincipled')
         separate_rgb_node = material.node_tree.nodes.new(type='ShaderNodeSeparateRGB')
         separate_rgb_node.location = (-576, -487)
@@ -69,7 +67,6 @@ def setup_material(context, json_file_path, texture_directories):
         rgb_node = material.node_tree.nodes.new(type='ShaderNodeRGB')
         rgb_node.location = (-533, -124)
 
-        # Getting the Normal Converter node group
         normal_converter = nodes.get('Normal_Convert')
         
         if not normal_converter:
@@ -78,7 +75,6 @@ def setup_material(context, json_file_path, texture_directories):
             normal_converter.node_tree = bpy.data.node_groups['Normal_Convert']
             normal_converter.location = (-593, -810)
 
-        # Principled BSDF Shader Default
         principled_node.inputs["Subsurface"].default_value = 0.008
         principled_node.inputs["Subsurface Radius"].default_value = (1.0, 0.2, 0.1)
         principled_node.inputs["Subsurface Anisotropy"].default_value = 0.8
@@ -89,23 +85,19 @@ def setup_material(context, json_file_path, texture_directories):
         rgb_node.outputs[0].default_value = (1.0, 0.230, 0.120, 1.0)
         material.node_tree.links.new(rgb_node.outputs[0], principled_node.inputs[2])
 
-        # Y-coordinate for aligning nodes
         y_coordinate = 550
         
-        # Create a Material Output node
         material_output_node = material.node_tree.nodes.new(type='ShaderNodeOutputMaterial')
         material.node_tree.links.new(principled_node.outputs[0], material_output_node.inputs[0])
         material_output_node.location.x = 300
 
-        # Print the textures dictionary
         print("Textures Dictionary:", textures)
 
-        # Iterate through possible texture directories and search for textures
         for texture_type, texture_name in textures.items():
             expected_texture_name = f"{texture_name}.png"
 
             found = False
-            for texture_directory in texture_directories.split(";"):  # Split by semicolon for multiple directories
+            for texture_directory in texture_directories.split(";"):
                 abs_texture_path, found_texture_type = find_textures(texture_directory, {texture_type: texture_name})
 
                 if abs_texture_path:
@@ -117,7 +109,7 @@ def setup_material(context, json_file_path, texture_directories):
                     texture_node.location.x = -1200
                     texture_node.location.y = y_coordinate
 
-                    y_coordinate -= 290  # Adjust this value based on your desired spacing
+                    y_coordinate -= 290
 
                     try:
                         texture_node.image = bpy.data.images.load(abs_texture_path)
@@ -127,7 +119,6 @@ def setup_material(context, json_file_path, texture_directories):
 
                         print(f"Loaded texture: {abs_texture_path}")
 
-                        # Connect the nodes based on your intended material appearance
                         if found_texture_type == "Diffuse Map":
                             material.node_tree.links.new(texture_node.outputs[0], mix_rgb_node.inputs[1])
                             material.node_tree.links.new(mix_rgb_node.outputs[0], mix_rgb_node2.inputs[1])
@@ -158,7 +149,7 @@ def setup_material(context, json_file_path, texture_directories):
                     except RuntimeError as e:
                         print(f"Error loading image '{abs_texture_path}': {e}")
 
-                    break  # Stop searching if the texture is found
+                    break
 
             if not found:
                 print(f"No matching texture found for material '{material_name}' and type '{texture_type}'.")
@@ -166,25 +157,30 @@ def setup_material(context, json_file_path, texture_directories):
     else:
         print(f"Material '{material_name}' not found in Blender.")
 
-
-# Operator class to run the setup_material function
 class MATERIAL_OT_setup(bpy.types.Operator):
     bl_idname = "material.setup_ue_texture"
     bl_label = "Setup UE Texture"
 
-    json_file_path: bpy.props.StringProperty(name="JSON File Path", subtype='FILE_PATH')
-    texture_directories: bpy.props.StringProperty(name="Texture Directories", subtype='DIR_PATH')
-
     def execute(self, context):
-        setup_material(context, self.json_file_path, self.texture_directories)
+        json_file_path = context.scene.json_file_path
+        texture_directories = context.scene.texture_directories
+
+        if not json_file_path or not os.path.isfile(json_file_path):
+            self.report({'ERROR'}, "JSON file path is not valid or not provided.")
+            return {'CANCELLED'}
+        
+        if not texture_directories:
+            self.report({'ERROR'}, "Texture directories path is not provided.")
+            return {'CANCELLED'}
+
+        setup_material(context, json_file_path, texture_directories)
         return {'FINISHED'}
 
-# UI panel to trigger the material setup
 class Combine_PT_Panel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = "PSK / PSA"
-    bl_label = "Import textures from Json"
+    bl_label = "Import textures from JSON"
 
     def draw(self, context):
         layout = self.layout
