@@ -1,11 +1,4 @@
-Here's a `README.md` file for your project:
-
----
-
 # UE Texture Importer for Blender
-
-### Version: 1.0.0
-### Author: KingJulz
 
 ## Overview
 
