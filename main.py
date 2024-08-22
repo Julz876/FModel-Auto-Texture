@@ -1,16 +1,8 @@
 import bpy
 import json
 import os
-import sys
 import random
-
 from .normal_converter import create_normal_converter
-
-def setup_material(material_name, json_file_path, texture_directories, common_prefix):
-    create_normal_converter()  # Create node group when setting up the material
-
-# Ensuring the normal converter is created and available
-create_normal_converter()
 
 def remove_nodes(node_tree):
     # Remove all nodes from the node tree
@@ -24,58 +16,39 @@ def find_textures(base_path, textures):
                 expected_texture_name = f"{texture_name}.png"
                 if filename.startswith(expected_texture_name):
                     abs_texture_path = os.path.join(root, filename)
-                    print(f"Found: {filename}")
-                    print(f"Expected: {expected_texture_name}")
-                    print(f"Path: {abs_texture_path}")
                     return abs_texture_path, texture_type
     return None, None
 
-# Replace 'your_material_file.json' with the actual path to your JSON file
-json_file_path = your_material_file.json
+def setup_material(context):
+    # Call the create_normal_converter here, ensuring Blender's data is fully initialized
+    create_normal_converter()
 
-# Common prefix for relative texture paths
-# Dumped game directory
-common_prefix = "H:/Dumped Games/CallistoProtocol"
+    # Your existing logic for setting up the material
+    json_file_path = "H:/Dumped Games/CallistoProtocol/Game/Characters/Elias/Materials/Head/Base/MI_Elias_Head.json"
+    common_prefix = "H:/Dumped Games/CallistoProtocol"
+    texture_directories = [
+        "H:/Dumped Games/CallistoProtocol/Game/Characters/Player/Textures",
+        "H:/Dumped Games/CallistoProtocol/Game/Characters/Elias/Textures",
+        "H:/Dumped Games/CallistoProtocol/Game/Characters/Shared",
+    ]
+    opengl_directx_flip = 1.0
 
-# Possible texture directories
-texture_directories = [
-    "H:/Dumped Games/CallistoProtocol/Game/Characters/Player/Textures",
-    "H:/Dumped Games/CallistoProtocol/Game/Characters/Elias/Textures",
-    "H:/Dumped Games/CallistoProtocol/Game/Characters/Shared",
-]
+    with open(json_file_path, 'r') as json_file:
+        try:
+            mat_data = json.load(json_file)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON in file '{json_file_path}': {e}")
+            mat_data = {}
 
-#Change for the type or normal conversion, 0.0 for opengl and 1.0 for directx
-opengl_directx_flip = 1.0
+    textures = mat_data.get("Textures", {})
+    textures = {key: value.split('/')[-1].split('.')[0] for key, value in textures.items()}
+    material_name = os.path.splitext(os.path.basename(json_file_path))[0]
+    material = bpy.data.materials.get(material_name)
 
-# Load JSON data
-with open(json_file_path, 'r') as json_file:
-    try:
-        mat_data = json.load(json_file)
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON in file '{json_file_path}': {e}")
-        mat_data = {}
-
-# Extract textures dictionary
-textures = mat_data.get("Textures", {})
-
-# Filter out unnecessary information in texture names
-textures = {key: value.split('/')[-1].split('.')[0] for key, value in textures.items()}
-
-# Get the base name of the JSON file (excluding the extension)
-material_name = os.path.splitext(os.path.basename(json_file_path))[0]
-
-print(f"Material Name: {material_name}")
-
-# Find the material in Blender based on its name
-material = bpy.data.materials.get(material_name)
-
-if material:
-    # Ensure we're using nodes in the material
-    material.use_nodes = True
-    nodes = material.node_tree.nodes
-
-    # Clear existing nodes in the material
-    remove_nodes(material.node_tree)
+    if material:
+        material.use_nodes = True
+        nodes = material.node_tree.nodes
+        remove_nodes(material.node_tree)
     
     # Create Shader nodes
     principled_node = material.node_tree.nodes.new(type='ShaderNodeBsdfPrincipled')
@@ -224,6 +197,14 @@ for texture_type, texture_name in textures.items():
 else:
     print(f"Material '{material_name}' not found in Blender.")
 
+# Operator class to run the setup_material function
+class MATERIAL_OT_setup(bpy.types.Operator):
+    bl_idname = "material.setup_ue_texture"
+    bl_label = "Setup UE Texture"
+
+    def execute(self, context):
+        setup_material(context)
+        return {'FINISHED'}
 
 # UI panel Testing
 class Combine_PT_Panel(bpy.types.Panel):
@@ -241,3 +222,14 @@ class Combine_PT_Panel(bpy.types.Panel):
         layout.label(text='3. Select 2 armatures')
         layout.label(text='4. Click the button below')        
         layout.operator(Importjson_OT_Run_Button.bl_idname, icon='MESH_DATA')
+
+def register():
+    bpy.utils.register_class(MATERIAL_OT_setup)
+    bpy.utils.register_class(Combine_PT_Panel)
+
+def unregister():
+    bpy.utils.unregister_class(MATERIAL_OT_setup)
+    bpy.utils.unregister_class(Combine_PT_Panel)
+
+if __name__ == "__main__":
+    register()
