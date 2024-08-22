@@ -1,8 +1,5 @@
 # UE Texture Importer for Blender
 
-### Version: 1.0.0
-### Author: KingJulz
-
 ## Overview
 
 The **UE Texture Importer** is a Blender addon designed to simplify the process of importing and setting up textures from Unreal Engine JSON material files. This tool automates the creation of materials in Blender, ensuring they are properly configured based on the texture maps specified in the JSON file. The add-on includes a custom normal map converter, enabling you to switch between OpenGL and DirectX normal map formats with ease.
