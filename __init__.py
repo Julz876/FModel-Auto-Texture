@@ -5,7 +5,7 @@ bl_info = {
     "name": "UE Texture Importer",
     "description": "Imports Unreal Engine JSON materials and automatically sets up corresponding textures in Blender.",
     "author": "KingxJulz",
-    "version": (1, 0, 0),
+    "version": (1, 0, 2),
     "blender": (3, 0, 0),
     "location": "View3D > Sidebar > PSK / PSA",
     "warning": "This requires the PSK / PSA addon in the N-Panel/Sidebar",
