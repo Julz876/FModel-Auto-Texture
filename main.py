@@ -4,13 +4,7 @@ import os
 import sys
 import random
 
-# Remove this after development
-# To allow for installation
-parent_dir = "H:/Modding_Tools/!Scripts"  # Parent directory containing the UE_Texture_Importer package
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
-
-from UE_Texture_Importer.normal_converter import create_normal_converter
+from .normal_converter import create_normal_converter
 
 # Ensuring the normal converter is created and available
 create_normal_converter()
