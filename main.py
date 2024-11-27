@@ -2,10 +2,14 @@ import bpy
 import json
 import os
 from .normal_converter import create_normal_converter
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 def remove_nodes(node_tree):
     for node in node_tree.nodes:
         node_tree.nodes.remove(node)
+        logging.info("scene material cleared!")
 
 def find_textures(base_path, textures):
     for root, dirs, files in os.walk(base_path):
@@ -75,9 +79,9 @@ def setup_material(context, json_file_path, texture_directories):
             normal_converter.node_tree = bpy.data.node_groups['Normal_Convert']
             normal_converter.location = (-593, -810)
 
-        principled_node.inputs["Subsurface"].default_value = 0.008
-        principled_node.inputs["Subsurface Radius"].default_value = (1.0, 0.2, 0.1)
-        principled_node.inputs["Subsurface Anisotropy"].default_value = 0.8
+        principled_node.inputs[7].default_value = 0.008
+        principled_node.inputs[8].default_value = (1.0, 0.2, 0.1)
+        principled_node.inputs[11].default_value = 0.8
         mix_rgb_node.blend_type = 'MULTIPLY'
         mix_rgb_node2.blend_type = 'MULTIPLY'
         mix_rgb_node.use_clamp = True
